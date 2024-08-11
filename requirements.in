@@ -1,1 +1,5 @@
 fastapi[all]
+sqlalchemy
+alembic
+psycopg2
+black
