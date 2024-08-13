@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, ForeignKey, Integer, String, MetaData, Numeric, Boolean, JSON
+from sqlalchemy import Table, Column, ForeignKey, Integer, String, MetaData, Boolean, JSON
 from sqlalchemy.orm import Mapped, mapped_column
 from fastapi_users.db import SQLAlchemyBaseUserTable
 from sqlalchemy.ext.declarative import DeclarativeMeta, declarative_base
