@@ -8,6 +8,8 @@ from auth.schemas import UserRead, UserCreate
 from auth.manager import get_user_manager
 from database import User
 
+from goods.router import router as router_goods
+
 
 app = FastAPI(title="OnlineShop")
 
@@ -27,6 +29,8 @@ app.include_router(
     prefix="/auth",
     tags=["auth"],
 )
+
+app.include_router(router_goods)
 
 if __name__ == "__main__":
     uvicorn.run(

@@ -5,7 +5,13 @@ from sqlalchemy import pool
 
 from alembic import context
 
-from src.models import meta_data
+import os
+import sys
+
+sys.path.append(os.path.join(sys.path[0], 'src'))
+
+from src.auth.models import meta_data as meta_src
+from src.goods.models import meta_data as meta_goods
 from config import db_settings
 
 # this is the Alembic Config object, which provides
@@ -27,7 +33,7 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
-target_metadata = meta_data
+target_metadata = [meta_src, meta_goods]
 
 # other values from the config, defined by the needs of env.py,
 # can be acquired:

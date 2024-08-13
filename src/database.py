@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
 from config import db_settings as stngs
-from models import User
+from auth.models import User
 
 DATABASE_URL = f"postgresql+asyncpg://{stngs.DB_USER}:{stngs.DB_PASS}@{stngs.DB_HOST}:{stngs.DB_PORT}/{stngs.DB_NAME}"
 

@@ -27,18 +27,6 @@ user = Table(
     Column("is_verified", Boolean, default=False, nullable=False)
 )
 
-product = Table(
-    "product",
-    meta_data,
-    Column("id", Integer, primary_key=True),
-    Column("name", String, nullable=False),
-    Column("description", String),
-    Column("price", Numeric(15, 2), nullable=False),
-    Column("amount", Integer, nullable=False),
-    Column("rate", Numeric(3, 2), nullable=False),
-    Column("seller_id", Integer, ForeignKey(user.c.id))
-)
-
 Base: DeclarativeMeta = declarative_base()
 
 class User(SQLAlchemyBaseUserTable[int], Base):
