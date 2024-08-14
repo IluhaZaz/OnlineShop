@@ -19,3 +19,6 @@ dotenv.load_dotenv('.env')
 
 MANAGER_SECRET = os.getenv("MANAGER_SECRET")
 JWT_SECRET = os.getenv("JWT_SECRET")
+
+SMTP_PASSWORD = os.getenv("SMTP_PASSWORD")
+SMTP_USER = os.getenv("SMTP_USER")

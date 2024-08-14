@@ -7,3 +7,4 @@ fastapi-users[sqlalchemy]
 asyncpg
 celery
 flower
+redis

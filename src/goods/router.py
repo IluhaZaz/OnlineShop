@@ -25,6 +25,7 @@ router = APIRouter(
     tags = ["Goods"]
 )
 
+current_user = fastapi_users.current_user()
 authenticated_users = fastapi_users.current_user(optional=True)
 
 @router.post("/")

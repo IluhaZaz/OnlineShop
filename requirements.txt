@@ -170,6 +170,8 @@ pyyaml==6.0.2
     # via
     #   fastapi
     #   uvicorn
+redis==5.0.8
+    # via -r requirements.in
 rich==13.7.1
     # via typer
 shellingham==1.5.4

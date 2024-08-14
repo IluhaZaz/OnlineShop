@@ -2,9 +2,12 @@ from typing import Optional
 
 from fastapi import Depends, Request, Response
 from fastapi_users import BaseUserManager, IntegerIDMixin, exceptions, schemas, models
+from email.message import EmailMessage
 
 from database import User, get_user_db
 from config import MANAGER_SECRET as SECRET
+
+from tasks.email_task import send_email_report_dashboard, get_email_template_dashboard
 
 
 class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
@@ -13,6 +16,11 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
 
     async def on_after_register(self, user: User, request: Optional[Request] = None):
         print(f"User {user.id} {user.email} has registered.")
+        content: str = f"<div>Dear {user.name}, you have been registred in our online shop</div>"
+        email: dict[str, str] = get_email_template_dashboard(to=user.email,
+                                                            theme="Successful registration",
+                                                            content=content)
+        send_email_report_dashboard.delay(email)
 
     async def on_after_login(self, user: User, request: Request | None = None, response: Response | None = None) -> None:
         print(f"User {user.id} {user.email} has logined.")
