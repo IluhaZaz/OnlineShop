@@ -5,3 +5,5 @@ psycopg2
 black
 fastapi-users[sqlalchemy]
 asyncpg
+celery
+flower
