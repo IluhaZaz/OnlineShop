@@ -1,4 +1,4 @@
-from sqlalchemy import Table, Column, MetaData, ForeignKey, Integer, Numeric, String
+from sqlalchemy import Table, Column, MetaData, ForeignKey, Integer, Numeric, String, ARRAY
 
 from auth.models import user
 
@@ -16,5 +16,6 @@ good = Table(
     Column("rate", Numeric(3, 2), nullable=False, default=0),
     Column("rate_cnt", Integer, nullable=False, default=0),
     Column("rate_sum", Numeric(3, 2), nullable=False, default=0),
+    Column("rated_by", ARRAY(Integer), nullable=[False], default=[]),
     Column("seller_id", Integer, ForeignKey(user.c.id))
 )

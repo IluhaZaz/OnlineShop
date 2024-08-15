@@ -2,7 +2,6 @@ from typing import Optional
 
 from fastapi import Depends, Request, Response
 from fastapi_users import BaseUserManager, IntegerIDMixin, exceptions, schemas, models
-from email.message import EmailMessage
 
 from database import User, get_user_db
 from config import MANAGER_SECRET as SECRET

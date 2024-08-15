@@ -4,17 +4,18 @@ from sqlalchemy import insert, select, delete, update
 from decimal import Decimal
 
 from .schemas import GoodRead, GoodCreate
-from database import get_async_session
+from database import get_async_session, User
 from goods.models import good
 from auth.models import user as user_table
-from auth.schemas import SellerInfo, Rate
+from auth.schemas import SellerInfo
+from goods.schemas import Rate
 
 
 from fastapi_users.fastapi_users import FastAPIUsers
 
 from auth.auth_back import auth_backend
 from auth.manager import get_user_manager
-from database import User
+
 
 fastapi_users = FastAPIUsers[User, int](
     get_user_manager,
@@ -133,10 +134,21 @@ async def rate(good_id: int,
                 session: AsyncSession = Depends(get_async_session),
                 user: User = Depends(verified_users)
     ):
+
+    good_obj = await session.execute(select(good).where(good.c.id == good_id))
+    good_obj = good_obj.all()[0]
+    good_obj = GoodRead.model_validate(good_obj, from_attributes=True)
+
+    if good_obj.seller_id == user.id:
+        raise HTTPException(400, "you can't rate your good")
+    if user.id in good_obj.rated_by:
+        raise HTTPException(400, "you can't rate good twice")
+
     rate.good_id = good_id
     stmt = update(good).values(rate_cnt = good.c.rate_cnt + 1, 
                                rate_sum = good.c.rate_sum + rate.rate,
-                               rate = (good.c.rate_sum + rate.rate)/(good.c.rate_cnt + 1)
+                               rate = (good.c.rate_sum + rate.rate)/(good.c.rate_cnt + 1),
+                               rated_by = good.c.rated_by + [user.id]
                                ).where(good.c.id == good_id)
     await session.execute(stmt)
     

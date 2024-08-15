@@ -36,11 +36,3 @@ class UserUpdate(schemas.BaseUserUpdate):
 class SellerInfo(BaseModel):
     full_name: str
     certificate_num: int
-
-
-class Rate(BaseModel):
-    good_id: int
-    rate: float
-    title: Optional[str]
-    comment: Optional[str]
-    
