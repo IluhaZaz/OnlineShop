@@ -2,6 +2,7 @@ from sqlalchemy import Table, Column, ForeignKey, Integer, String, MetaData, Boo
 from sqlalchemy.orm import Mapped, mapped_column
 from fastapi_users.db import SQLAlchemyBaseUserTable
 from sqlalchemy.ext.declarative import DeclarativeMeta, declarative_base
+from typing import Optional
 
 meta_data = MetaData()
 
@@ -24,7 +25,8 @@ user = Table(
     Column("email", String, unique=True, nullable=False),
     Column("is_active", Boolean, default=True, nullable=False),
     Column("is_superuser", Boolean, default=False, nullable=False),
-    Column("is_verified", Boolean, default=False, nullable=False)
+    Column("is_verified", Boolean, default=False, nullable=False),
+    Column("seller_data", JSON, default=None)
 )
 
 Base: DeclarativeMeta = declarative_base()
@@ -47,3 +49,4 @@ class User(SQLAlchemyBaseUserTable[int], Base):
     is_verified: Mapped[bool] = mapped_column(
         Boolean, default=False, nullable=False
     )
+    seller_data: Mapped[Optional[dict[str, str]]] = mapped_column(JSON, default=None)

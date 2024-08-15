@@ -1,5 +1,6 @@
 from fastapi_users import schemas
 from typing import Optional
+from pydantic import BaseModel
 
 
 class UserRead(schemas.BaseUser[int]):
@@ -30,3 +31,8 @@ class UserUpdate(schemas.BaseUserUpdate):
     is_active: Optional[bool] = None
     is_superuser: Optional[bool] = None
     is_verified: Optional[bool] = None
+
+class SellerInfo(BaseModel):
+    full_name: str
+    certificate_num: int
+    

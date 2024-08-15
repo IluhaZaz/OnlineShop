@@ -3,9 +3,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import insert, select, delete, update
 from decimal import Decimal
 
-from .schemas import GoodCreate
+from .schemas import GoodRead, GoodCreate
 from database import get_async_session
 from goods.models import good
+from auth.models import user as user_table
+from auth.schemas import SellerInfo
 
 
 from fastapi_users.fastapi_users import FastAPIUsers
@@ -44,7 +46,7 @@ async def add_good(new_good: GoodCreate,
     await session.execute(stmt)
     await session.commit()
 
-@router.get("/", response_model=list[GoodCreate])
+@router.get("/", response_model=list[GoodRead])
 async def get_goods(session: AsyncSession = Depends(get_async_session), 
                     rate: Decimal = None,
                     name: str = None,
@@ -78,7 +80,7 @@ async def update_good(id: int,
     query = select(good).where(good.c.id == id)
     curr_good = await session.execute(query)
     curr_good = curr_good.all()[0]
-    curr_good = GoodCreate.model_validate(curr_good, from_attributes=True)
+    curr_good = GoodRead.model_validate(curr_good, from_attributes=True)
     
     if curr_good.seller_id != user.id:
         raise HTTPException(402, "that's not your good")
@@ -107,7 +109,7 @@ async def delete_good(id: int,
     query = select(good).where(good.c.id == id)
     curr_good = await session.execute(query)
     curr_good = curr_good.all()[0]
-    curr_good = GoodCreate.model_validate(curr_good, from_attributes=True)
+    curr_good = GoodRead.model_validate(curr_good, from_attributes=True)
     if curr_good.seller_id != user.id:
         raise HTTPException(402, "that's not your good")
     
@@ -115,6 +117,12 @@ async def delete_good(id: int,
     await session.execute(stmt)
     await session.commit()
 
-@router.post("/")
-async def become_seller():
-    pass
+@router.post("/sell")
+async def become_seller(
+    your_data: SellerInfo,
+    session: AsyncSession = Depends(get_async_session),
+    user: User = Depends(verified_users)
+                      ):
+    stmt = update(user_table).values(role_id = 2, seller_data = your_data.model_dump()).where(user_table.c.id == user.id)
+    await session.execute(stmt)
+    await session.commit()
