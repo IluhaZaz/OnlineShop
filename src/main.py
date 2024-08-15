@@ -36,6 +36,12 @@ app.include_router(
     tags=['auth']
 )
 
+app.include_router(
+    fastapi_users.get_verify_router(UserRead),
+    prefix="/auth",
+    tags = ["auth"]
+)
+
 app.include_router(router_goods)
 
 if __name__ == "__main__":

@@ -26,11 +26,36 @@ class UserManager(IntegerIDMixin, BaseUserManager[User, int]):
         print(f"User {user.id} {user.email} has logined.")
 
     async def on_after_forgot_password(self, user: User, token: str, request: Request | None = None):
-        print(token)
-        return token
+        print(f"User {user.id} {user.email} has requested password reset.")
+        content: str = f"<div>Dear {user.name}, use this token to reset your password:</div><div>{token}</div>"
+        email: dict[str, str] = get_email_template_dashboard(to=user.email,
+                                                            theme="Password reset",
+                                                            content=content)
+        send_email_report_dashboard.delay(email)
     
     async def on_after_reset_password(self, user: User, request: Request | None = None) -> None:
         print(f"User {user.id} {user.email} has reseted password.")
+        content: str = f"<div>Dear {user.name}, your password has been reseted</div>"
+        email: dict[str, str] = get_email_template_dashboard(to=user.email,
+                                                            theme="Password reset",
+                                                            content=content)
+        send_email_report_dashboard.delay(email)
+
+    async def on_after_request_verify(self, user: User, token: str, request: Request | None = None) -> None:
+        print(f"User {user.id} {user.email} has requested email verification.")
+        content: str = f"<div>Dear {user.name}, use this token to verify your email:</div><div>{token}</div>"
+        email: dict[str, str] = get_email_template_dashboard(to=user.email,
+                                                            theme="Email verification",
+                                                            content=content)
+        send_email_report_dashboard.delay(email)
+
+    async def on_after_verify(self, user: User, request: Request | None = None) -> None:
+        print(f"User {user.id} {user.email} has been verified.")
+        content: str = f"<div>Dear {user.name}, your email has been verified"
+        email: dict[str, str] = get_email_template_dashboard(to=user.email,
+                                                            theme="Email verification",
+                                                            content=content)
+        send_email_report_dashboard.delay(email)
         
     async def create(
         self,

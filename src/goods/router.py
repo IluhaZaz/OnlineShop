@@ -26,12 +26,12 @@ router = APIRouter(
 )
 
 current_user = fastapi_users.current_user()
-authenticated_users = fastapi_users.current_user(optional=True)
+verified_users = fastapi_users.current_user(verified=True)
 
 @router.post("/")
 async def add_good(new_good: GoodCreate, 
                    session: AsyncSession = Depends(get_async_session),
-                   user: User = Depends(authenticated_users)
+                   user: User = Depends(verified_users)
                    ):
     if not user:
         raise HTTPException(400, "you need to be authenticated")
@@ -67,7 +67,7 @@ async def get_goods(session: AsyncSession = Depends(get_async_session),
 @router.patch("/")
 async def update_good(id: int, 
                       session: AsyncSession = Depends(get_async_session),
-                      user: User = Depends(authenticated_users),
+                      user: User = Depends(verified_users),
                       name: str = None,
                       description: str = None,
                       price: Decimal = None
@@ -99,7 +99,7 @@ async def update_good(id: int,
 @router.delete("/")
 async def delete_good(id: int, 
                       session: AsyncSession = Depends(get_async_session),
-                      user: User = Depends(authenticated_users)
+                      user: User = Depends(verified_users)
                       ):
     if not user:
         raise HTTPException(400, "you need to be authenticated")
@@ -114,3 +114,7 @@ async def delete_good(id: int,
     stmt = delete(good).where(good.c.id == curr_good.id)
     await session.execute(stmt)
     await session.commit()
+
+@router.post("/")
+async def become_seller():
+    pass
