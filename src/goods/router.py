@@ -7,7 +7,7 @@ from .schemas import GoodRead, GoodCreate
 from database import get_async_session
 from goods.models import good
 from auth.models import user as user_table
-from auth.schemas import SellerInfo
+from auth.schemas import SellerInfo, Rate
 
 
 from fastapi_users.fastapi_users import FastAPIUsers
@@ -125,4 +125,24 @@ async def become_seller(
                       ):
     stmt = update(user_table).values(role_id = 2, seller_data = your_data.model_dump()).where(user_table.c.id == user.id)
     await session.execute(stmt)
+    await session.commit()
+
+@router.post("/rate")
+async def rate(good_id: int,
+                rate: Rate,
+                session: AsyncSession = Depends(get_async_session),
+                user: User = Depends(verified_users)
+    ):
+    rate.good_id = good_id
+    stmt = update(good).values(rate_cnt = good.c.rate_cnt + 1, 
+                               rate_sum = good.c.rate_sum + rate.rate,
+                               rate = (good.c.rate_sum + rate.rate)/(good.c.rate_cnt + 1)
+                               ).where(good.c.id == good_id)
+    await session.execute(stmt)
+    
+    user.comments.append(rate.model_dump())
+
+    stmt = update(user_table).values(comments=user.comments).where(user_table.c.id == user.id)
+    await session.execute(stmt)
+
     await session.commit()
