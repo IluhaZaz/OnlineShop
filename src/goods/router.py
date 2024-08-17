@@ -8,6 +8,7 @@ from database import get_async_session, User
 from goods.models import good
 from auth.models import user as user_table
 from auth.schemas import SellerInfo
+from auth.schemas import UserRead
 from goods.schemas import Rate
 
 
@@ -31,23 +32,37 @@ router = APIRouter(
 current_user = fastapi_users.current_user()
 verified_users = fastapi_users.current_user(verified=True)
 
-@router.post("/")
+@router.post("/add_good")
 async def add_good(new_good: GoodCreate, 
                    session: AsyncSession = Depends(get_async_session),
                    user: User = Depends(verified_users)
                    ):
-    if not user:
-        raise HTTPException(400, "you need to be authenticated")
     
     if user.role_id != 2:
-        raise HTTPException(401, "you are not a seller")
+        raise HTTPException(status_code=400, detail=
+                            {
+                                "status": "error",
+                                "detail": "you need to be a seller",
+                                "data": None
+                            }
+                            )
     
     new_good.seller_id = user.id
     stmt = insert(good).values(**new_good.model_dump(exclude="id"))
     await session.execute(stmt)
     await session.commit()
 
-@router.get("/", response_model=list[GoodRead])
+    res = await session.execute(good.select().order_by(good.c.id.desc()).limit(1))
+    res = GoodRead.model_validate(res.first(), from_attributes=True)
+
+    return {
+        "status": "ok",
+        "detail": "good added",
+        "data": res.model_dump()
+    }
+
+
+@router.get("/get_goods", response_model=dict)
 async def get_goods(session: AsyncSession = Depends(get_async_session), 
                     rate: Decimal = None,
                     name: str = None,
@@ -65,18 +80,24 @@ async def get_goods(session: AsyncSession = Depends(get_async_session),
         query = query.where(good.c.price <= price_r)
     
     res = await session.execute(query)
-    return res.all()
+    res = res.all()
+    res = [GoodRead.model_validate(line, from_attributes=True).model_dump() for line in res]
+    return {
+        "status": "ok",
+        "detail": "got goods",
+        "data": res
+    }
 
-@router.patch("/")
+
+@router.patch("/update_good")
 async def update_good(id: int, 
                       session: AsyncSession = Depends(get_async_session),
                       user: User = Depends(verified_users),
                       name: str = None,
                       description: str = None,
-                      price: Decimal = None
+                      price: Decimal = None,
+                      amount: int = None
                     ):
-    if not user:
-        raise HTTPException(400, "you need to be authenticated")
     
     query = select(good).where(good.c.id == id)
     curr_good = await session.execute(query)
@@ -84,7 +105,13 @@ async def update_good(id: int,
     curr_good = GoodRead.model_validate(curr_good, from_attributes=True)
     
     if curr_good.seller_id != user.id:
-        raise HTTPException(402, "that's not your good")
+        raise HTTPException(status_code=400, detail=
+                            {
+                                "status": "error",
+                                "detail": "that's not your good",
+                                "data": None
+                            }
+                            )
     
     stmt = update(good)
     if name:
@@ -93,40 +120,71 @@ async def update_good(id: int,
         stmt = stmt.values(description=description)
     if price:
         stmt = stmt.values(price=price)
+    if amount:
+        stmt = stmt.values(amount=amount)
     stmt = stmt.where(good.c.id == curr_good.id)
 
     await session.execute(stmt)
     await session.commit()
+
+    res = await session.execute(select(good).where(good.c.id == id))
+    res = GoodRead.model_validate(res.first(), from_attributes=True)
+
+    return {
+        "status": "ok",
+        "detail": "good updated",
+        "data": res.model_dump()
+    }
     
 
-@router.delete("/")
+@router.delete("/delete_good")
 async def delete_good(id: int, 
                       session: AsyncSession = Depends(get_async_session),
                       user: User = Depends(verified_users)
                       ):
-    if not user:
-        raise HTTPException(400, "you need to be authenticated")
     
     query = select(good).where(good.c.id == id)
     curr_good = await session.execute(query)
     curr_good = curr_good.all()[0]
     curr_good = GoodRead.model_validate(curr_good, from_attributes=True)
     if curr_good.seller_id != user.id:
-        raise HTTPException(402, "that's not your good")
+        raise HTTPException(status_code=400, detail=
+                            {
+                                "status": "error",
+                                "detail": "that's not your good",
+                                "data": None
+                            }
+                            )
     
     stmt = delete(good).where(good.c.id == curr_good.id)
     await session.execute(stmt)
     await session.commit()
 
-@router.post("/sell")
+    return {
+                "status": "ok",
+                "detail": "good deleted",
+                "data": curr_good.model_dump()
+            }
+
+
+@router.post("/become_seller")
 async def become_seller(
     your_data: SellerInfo,
     session: AsyncSession = Depends(get_async_session),
     user: User = Depends(verified_users)
                       ):
-    stmt = update(user_table).values(role_id = 2, seller_data = your_data.model_dump()).where(user_table.c.id == user.id)
-    await session.execute(stmt)
+    user = await session.get(User, user.id)
+    user.role_id = 2
+    user.seller_data = your_data.model_dump()
+
     await session.commit()
+    
+    return {
+                "status": "ok",
+                "detail": "now you are a seller",
+                "data": UserRead.model_validate(user, from_attributes=True).model_dump()
+            }
+
 
 @router.post("/rate")
 async def rate(good_id: int,
@@ -140,9 +198,19 @@ async def rate(good_id: int,
     good_obj = GoodRead.model_validate(good_obj, from_attributes=True)
 
     if good_obj.seller_id == user.id:
-        raise HTTPException(400, "you can't rate your good")
+        raise HTTPException(status_code=400, detail={
+                                "status": "error",
+                                "detail": "you can't rate your good",
+                                "data": None
+                            }
+                            )
     if user.id in good_obj.rated_by:
-        raise HTTPException(400, "you can't rate good twice")
+        raise HTTPException(status_code=400, detail={
+                                "status": "error",
+                                "detail": "you can't rate good twice",
+                                "data": None
+                            }
+                            )
 
     rate.good_id = good_id
     stmt = update(good).values(rate_cnt = good.c.rate_cnt + 1, 
@@ -158,3 +226,12 @@ async def rate(good_id: int,
     await session.execute(stmt)
 
     await session.commit()
+
+    rated_good = await session.execute(select(good).where(good.c.id == good_id))
+    rated_good = rated_good.first()
+
+    return {
+                "status": "ok",
+                "detail": "good rated",
+                "data": GoodRead.model_validate(rated_good, from_attributes=True).model_dump()
+            }
