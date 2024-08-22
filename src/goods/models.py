@@ -1,9 +1,7 @@
-from sqlalchemy import Table, Column, MetaData, ForeignKey, Integer, Numeric, String, ARRAY
+from sqlalchemy import Table, Column, ForeignKey, Integer, Numeric, String, ARRAY
 
 from auth.models import user
-
-
-meta_data = MetaData()
+from database import meta_data
 
 good = Table(
     "good",

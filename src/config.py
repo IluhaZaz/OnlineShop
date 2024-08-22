@@ -15,6 +15,17 @@ class DbSettings(BaseSettings):
 
 db_settings = DbSettings()
 
+class DbTestSettings(BaseSettings):
+    DB_HOST_TEST: str
+    DB_NAME_TEST: str
+    DB_PASS_TEST: str
+    DB_PORT_TEST: str
+    DB_USER_TEST: str
+
+    model_config = SettingsConfigDict()
+
+db_test_settings = DbTestSettings()
+
 dotenv.load_dotenv('.env')
 
 MANAGER_SECRET = os.getenv("MANAGER_SECRET")

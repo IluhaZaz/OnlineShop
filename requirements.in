@@ -8,3 +8,5 @@ asyncpg
 celery
 flower
 redis
+pytest
+pytest-asyncio

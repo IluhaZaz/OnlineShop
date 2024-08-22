@@ -1,10 +1,11 @@
-from sqlalchemy import Table, Column, ForeignKey, Integer, String, MetaData, Boolean, JSON, ARRAY
+from sqlalchemy import Table, Column, ForeignKey, Integer, String, Boolean, JSON, ARRAY
 from sqlalchemy.orm import Mapped, mapped_column
 from fastapi_users.db import SQLAlchemyBaseUserTable
-from sqlalchemy.ext.declarative import DeclarativeMeta, declarative_base
+from sqlalchemy.ext.declarative import DeclarativeMeta
+from sqlalchemy.orm import declarative_base
 from typing import Optional
 
-meta_data = MetaData()
+from database import meta_data
 
 role = Table(
     "role",

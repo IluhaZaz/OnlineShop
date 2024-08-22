@@ -59,6 +59,7 @@ click-repl==0.3.0
 colorama==0.4.6
     # via
     #   click
+    #   pytest
     #   uvicorn
 cryptography==43.0.0
     # via pyjwt
@@ -101,6 +102,8 @@ idna==3.7
     #   anyio
     #   email-validator
     #   httpx
+iniconfig==2.0.0
+    # via pytest
 itsdangerous==2.2.0
     # via fastapi
 jinja2==3.1.4
@@ -124,11 +127,15 @@ mypy-extensions==1.0.0
 orjson==3.10.7
     # via fastapi
 packaging==24.1
-    # via black
+    # via
+    #   black
+    #   pytest
 pathspec==0.12.1
     # via black
 platformdirs==4.2.2
     # via black
+pluggy==1.5.0
+    # via pytest
 prometheus-client==0.20.0
     # via flower
 prompt-toolkit==3.0.47
@@ -154,6 +161,12 @@ pygments==2.18.0
     # via rich
 pyjwt[crypto]==2.8.0
     # via fastapi-users
+pytest==8.3.2
+    # via
+    #   -r requirements.in
+    #   pytest-asyncio
+pytest-asyncio==0.24.0
+    # via -r requirements.in
 python-dateutil==2.9.0.post0
     # via celery
 python-dotenv==1.0.1
