@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, conint
 from decimal import Decimal
 from typing import Optional
 
@@ -22,3 +22,7 @@ class Rate(BaseModel):
     title: Optional[str]
     comment: Optional[str]
     
+
+class Pagination(BaseModel):
+    offset: conint(ge=0) = 0
+    limit: conint(ge=1, le=30) = 15

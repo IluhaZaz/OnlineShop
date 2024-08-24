@@ -9,7 +9,7 @@ from goods.models import good
 from auth.models import user as user_table
 from auth.schemas import SellerInfo
 from auth.schemas import UserRead
-from goods.schemas import Rate
+from goods.schemas import Rate, Pagination
 
 
 from fastapi_users.fastapi_users import FastAPIUsers
@@ -64,6 +64,7 @@ async def add_good(new_good: GoodCreate,
 
 @router.get("/get_goods", response_model=dict)
 async def get_goods(session: AsyncSession = Depends(get_async_session), 
+                    p: Pagination = Depends(),
                     rate: Decimal = None,
                     name: str = None,
                     price_l: Decimal = None,
@@ -78,6 +79,7 @@ async def get_goods(session: AsyncSession = Depends(get_async_session),
         query = query.where(good.c.price >= price_l)
     if price_r:
         query = query.where(good.c.price <= price_r)
+    query = query.offset(p.offset*p.limit).limit(p.limit)
     
     res = await session.execute(query)
     res = res.all()
