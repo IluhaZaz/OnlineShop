@@ -3,7 +3,7 @@ from typing import Optional
 from fastapi import Depends, Request, Response
 from fastapi_users import BaseUserManager, IntegerIDMixin, exceptions, schemas, models
 
-from database import User, get_user_db
+from auth.utils import User, get_user_db
 from config import MANAGER_SECRET as SECRET
 
 from tasks.email_task import send_email_report_dashboard, get_email_template_dashboard

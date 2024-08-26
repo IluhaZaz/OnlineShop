@@ -85,6 +85,8 @@ flower==2.0.1
     # via -r requirements.in
 greenlet==3.0.3
     # via sqlalchemy
+gunicorn==23.0.0
+    # via -r requirements.in
 h11==0.14.0
     # via
     #   httpcore
@@ -129,6 +131,7 @@ orjson==3.10.7
 packaging==24.1
     # via
     #   black
+    #   gunicorn
     #   pytest
 pathspec==0.12.1
     # via black

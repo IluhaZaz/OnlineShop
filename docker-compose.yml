@@ -1,0 +1,48 @@
+version: '3.8'
+services:
+
+  db:
+    image: postgres:16
+    container_name: db_shop
+    env_file:
+      - .env_non_dev
+
+  redis:
+    image: redis:7
+    container_name: redis_shop
+
+  app:
+    build:
+      context: .
+    env_file:
+      - .env_non_dev
+    container_name: app_shop
+    command: ["/shop_app/docker_scripts/app.sh"]
+    ports:
+      - 9999:8000
+    depends_on:
+      - redis
+      - db
+
+  celery:
+    build:
+      context: .
+    env_file:
+      - .env_non_dev
+    container_name: celery_shop
+    command: ["/shop_app/docker_scripts/celery.sh", "selery"]
+    depends_on:
+      - redis
+
+  # flower:
+  #   build:
+  #     context: .
+  #   env_file:
+  #     - .env_non_dev
+  #   container_name: flower_shop
+  #   command: ["/shop_app/docker_scripts/celery.sh", "flower"]
+  #   depends_on:
+  #     - redis
+  #     - celery
+  #   ports:
+  #     - 8888:6666

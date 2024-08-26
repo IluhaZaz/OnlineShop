@@ -10,7 +10,6 @@ import sys
 
 sys.path.append(os.path.join(sys.path[0], 'src'))
 
-from src.auth.models import meta_data
 from src.goods.models import meta_data
 from config import db_settings
 

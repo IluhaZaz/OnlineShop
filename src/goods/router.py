@@ -4,7 +4,8 @@ from sqlalchemy import insert, select, delete, update
 from decimal import Decimal
 
 from .schemas import GoodRead, GoodCreate
-from database import get_async_session, User
+from database import get_async_session
+from auth.models import User
 from goods.models import good
 from auth.models import user as user_table
 from auth.schemas import SellerInfo

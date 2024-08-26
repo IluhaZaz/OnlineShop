@@ -6,7 +6,7 @@ from fastapi_users import FastAPIUsers
 from auth.auth_back import auth_backend
 from auth.schemas import UserRead, UserCreate
 from auth.manager import get_user_manager
-from database import User
+from auth.models import User
 
 from goods.router import router as router_goods
 
