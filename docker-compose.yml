@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.7"
 services:
 
   db:
@@ -30,19 +30,15 @@ services:
     env_file:
       - .env_non_dev
     container_name: celery_shop
-    command: ["/shop_app/docker_scripts/celery.sh", "selery"]
+    command: celery --app=src.tasks.email_task:celery worker -l INFO
     depends_on:
       - redis
 
-  # flower:
-  #   build:
-  #     context: .
-  #   env_file:
-  #     - .env_non_dev
-  #   container_name: flower_shop
-  #   command: ["/shop_app/docker_scripts/celery.sh", "flower"]
-  #   depends_on:
-  #     - redis
-  #     - celery
-  #   ports:
-  #     - 8888:6666
+  flower:
+    container_name: flower_shop
+    image: mher/flower:0.9.7
+    command: ['flower', '--broker=redis://redis:6379', '--port=5555']
+    ports:
+      - 5557:5555
+    depends_on:
+      - redis
